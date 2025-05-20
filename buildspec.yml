@@ -1,0 +1,20 @@
+phases:
+  build:
+    commands:
+      - echo "Building branch $CODEBUILD_WEBHOOK_HEAD_REF"
+      - if [ "$CODEBUILD_WEBHOOK_HEAD_REF" = "refs/heads/feature" ]; then
+          echo "Merging feature into release...";
+          git config --global user.email "ci@example.com";
+          git config --global user.name "CI Bot";
+          git checkout release;
+          git merge origin/feature --no-ff -m "Auto-merge from feature to release";
+          git push origin release;
+        elif [ "$CODEBUILD_WEBHOOK_HEAD_REF" = "refs/heads/release" ]; then
+          echo "Creating snapshot for release branch";
+          # snapshot commands here
+        elif [ "$CODEBUILD_WEBHOOK_HEAD_REF" = "refs/heads/main" ]; then
+          echo "Generating Postman collection for main branch";
+          # Newman CLI commands here
+        else
+          echo "No action for this branch";
+        fi
