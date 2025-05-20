@@ -1,20 +1,51 @@
+version: 0.2
+
 phases:
+  install:
+    commands:
+      - echo Installing dependencies...
+      - apt-get update && apt-get install -y zip git curl
+      - npm install -g newman # Needed for Postman CLI
+
+  pre_build:
+    commands:
+      - echo "Triggered branch: $CODEBUILD_WEBHOOK_HEAD_REF"
+      - git config --global user.email "ci@example.com"
+      - git config --global user.name "CI Bot"
+      - git fetch origin
+
   build:
     commands:
-      - echo "Building branch $CODEBUILD_WEBHOOK_HEAD_REF"
-      - if [ "$CODEBUILD_WEBHOOK_HEAD_REF" = "refs/heads/feature" ]; then
-          echo "Merging feature into release...";
-          git config --global user.email "ci@example.com";
-          git config --global user.name "CI Bot";
-          git checkout release;
-          git merge origin/feature --no-ff -m "Auto-merge from feature to release";
-          git push origin release;
-        elif [ "$CODEBUILD_WEBHOOK_HEAD_REF" = "refs/heads/release" ]; then
-          echo "Creating snapshot for release branch";
-          # snapshot commands here
-        elif [ "$CODEBUILD_WEBHOOK_HEAD_REF" = "refs/heads/main" ]; then
-          echo "Generating Postman collection for main branch";
-          # Newman CLI commands here
+      - |
+        BRANCH_NAME=$(echo "$CODEBUILD_WEBHOOK_HEAD_REF" | sed 's|refs/heads/||')
+        echo "📌 Current branch: $BRANCH_NAME"
+
+        if [[ "$BRANCH_NAME" == "feature/add-empolyee-api" ]]; then
+          echo "🔁 Merging feature into develop..."
+          git checkout develop
+          git merge origin/feature/add-empolyee-api --no-ff --allow-unrelated-histories -m "Auto-merge from feature"
+          git push origin develop
+
+        elif [[ "$BRANCH_NAME" == "develop" ]]; then
+          echo "🔁 Merging develop into release/v1.0.0..."
+          git checkout release/v1.0.0
+          git merge origin/develop --no-ff --allow-unrelated-histories -m "Auto-merge from develop"
+          git push origin release/v1.0.0
+
+        elif [[ "$BRANCH_NAME" == "release/v1.0.0" ]]; then
+          echo "📦 Creating snapshot ZIP..."
+          mkdir -p snapshots
+          SNAPSHOT_NAME="snapshot-$(date +%Y%m%d-%H%M%S).zip"
+          zip -r "snapshots/$SNAPSHOT_NAME" .
+          aws s3 cp "snapshots/$SNAPSHOT_NAME" s3://mule-snapshot/$SNAPSHOT_NAME
+          echo "✅ Snapshot uploaded: $SNAPSHOT_NAME"
+
+        elif [[ "$BRANCH_NAME" == "main" ]]; then
+          echo "🧪 Running Postman collection..."
+          newman run postman_collection.json --reporters cli,html --reporter-html-export newman-report.html
+          aws s3 cp newman-report.html s3://postman-report-bucket/newman-report-$(date +%Y%m%d-%H%M%S).html
+          echo "✅ Postman report uploaded."
+
         else
-          echo "No action for this branch";
+          echo "🚫 No build action for branch: $BRANCH_NAME"
         fi
