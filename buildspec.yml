@@ -1,5 +1,5 @@
+---
 version: 0.2
-
 phases:
   install:
     runtime-versions:
@@ -8,20 +8,17 @@ phases:
       - echo Installing required packages...
       - apt-get update && apt-get install -y zip git curl
       - npm install -g newman
-
   pre_build:
     commands:
       - echo "Branch triggered: $CODEBUILD_WEBHOOK_HEAD_REF"
       - git config --global user.name "CI Bot"
       - git config --global user.email "ci@example.com"
       - git fetch origin
-
   build:
     commands:
-      - |
-        BRANCH_NAME=$(echo "$CODEBUILD_WEBHOOK_HEAD_REF" | sed 's|refs/heads/||')
-        echo "📌 Current branch: $BRANCH_NAME"
-
+      - BRANCH_NAME=$(echo "$CODEBUILD_WEBHOOK_HEAD_REF" | sed 's|refs/heads/||')
+      - echo "📌 Current branch: $BRANCH_NAME"
+      - >
         if [[ "$BRANCH_NAME" == feature/* ]]; then
           echo "🔁 Merging feature into develop..."
           git checkout develop
