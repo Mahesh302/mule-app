@@ -2,12 +2,21 @@ version: 0.2
 
 phases:
   install:
+    runtime-versions:
+      java: corretto11
     commands:
-      - echo Installing...
+      - echo Installing dependencies...
+      - yum install -y zip jq # for packaging and JSON parsing (optional)
+      - curl -sL https://rpm.nodesource.com/setup_18.x | bash -
+      - yum install -y nodejs
+      - npm install -g newman
+      - chmod +x ci_build.sh build.sh
+
   pre_build:
     commands:
-      - echo Pre-build phase...
-  build:
-    commands:
-       - chmod +x ci_build.sh
-       - ./ci_build.sh
+      - echo Starting pre_build phase...
+      - ./ci_build.sh
+
+artifacts:
+  files:
+    - '**/*'
