@@ -20,6 +20,7 @@ phases:
       - echo "Pre-build phase started"
       - git config --global user.name "CI Bot"
       - git config --global user.email "ci@example.com"
+      - cd $CODEBUILD_SRC_DIR
       - git fetch origin
 
   build:
