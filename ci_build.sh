@@ -1,6 +1,12 @@
 #!/bin/bash
 set -e
 
+# Check if GITHUB_TOKEN is set
+if [ -z "$GITHUB_TOKEN" ]; then
+  echo "Error: GITHUB_TOKEN environment variable is not set."
+  exit 1
+fi
+
 # Clone repo if not present
 if [ ! -d mule-app ]; then
   echo "Cloning mule-app repo..."
@@ -11,11 +17,11 @@ fi
 
 cd mule-app
 
-# Set Git identity
+# Configure git user info (for commits)
 git config --global user.email "build@codebuild.aws"
 git config --global user.name "AWS CodeBuild"
 
-# Detect branch name from CodeBuild environment variable
+# Detect branch name
 if [ -n "$CODEBUILD_WEBHOOK_HEAD_REF" ]; then
   BRANCH_NAME=$(echo "$CODEBUILD_WEBHOOK_HEAD_REF" | sed 's|refs/heads/||')
 else
@@ -23,6 +29,9 @@ else
 fi
 
 echo "Current branch: $BRANCH_NAME"
+
+# Fetch latest remote branches and tags
+git fetch origin
 
 # Branch-based logic
 if [[ "$BRANCH_NAME" == feature/* ]]; then
