@@ -8,26 +8,25 @@ phases:
       - echo "Installing dependencies..."
       - apt-get update && apt-get install -y zip git curl
       - npm install -g newman
-  
+
   pre_build:
     commands:
       - echo "Webhook branch: $CODEBUILD_WEBHOOK_HEAD_REF"
       - git config --global user.name "CI Bot"
       - git config --global user.email "ci@example.com"
       - git fetch origin
-  
+
   build:
     commands:
-      - echo "Detecting branch name..."
-      - BRANCH_NAME=$(echo "$CODEBUILD_WEBHOOK_HEAD_REF" | sed 's|refs/heads/||')
-      - echo "Running logic for branch: $BRANCH_NAME"
-      - echo "Build phase completed"
-  
-  post_build:
-    commands:
-      - echo "Post-build phase"
-
-artifacts:
-  files:
-    - '**/*'
-  discard-paths: no
+      - echo "Detecting branch name and running build logic..."
+      - |
+        BRANCH_NAME=$(echo "$CODEBUILD_WEBHOOK_HEAD_REF" | sed 's|refs/heads/||')
+        echo "Running logic for branch: $BRANCH_NAME"
+        if [[ "$BRANCH_NAME" == feature/* ]]; then
+          echo "Merging feature branch into develop..."
+          git checkout develop
+          git merge origin/"$BRANCH_NAME" --no-ff -m "Auto-merge from $BRANCH_NAME"
+          git push origin develop
+        fi
+      - chmod +x build.sh
+      - ./build.sh
