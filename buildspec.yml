@@ -45,3 +45,4 @@ phases:
           aws s3 cp newman-report.html s3://postman-report-bucket/newman-report-$(date +%Y%m%d-%H%M%S).html
         else
           echo "No matching branch rule. Skipping build"
+        fi
