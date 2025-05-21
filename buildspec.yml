@@ -6,11 +6,11 @@ phases:
       java: corretto11
     commands:
       - echo "Installing dependencies..."
-      - apt-get update -y
-      - apt-get install -y zip git curl
+      - yum update -y
+      - yum install -y zip git curl python3
       - npm install -g newman
-      - colon=$(python -c "print(chr(58))")
-      - dash=$(python -c "print(chr(45))")
+      - colon=$(python3 -c "print(chr(58))")
+      - dash=$(python3 -c "print(chr(45))")
       - field_to_hold="http${colon}//www.example${dash}site.com"
       - echo "$field_to_hold"
 
