@@ -9,4 +9,4 @@ phases:
       - echo Pre-build phase...
   build:
     commands:
-      - ./build_ci.sh
+      - ./ci_build.sh
