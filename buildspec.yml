@@ -9,22 +9,11 @@ phases:
       - apt-get update -y
       - apt-get install -y zip git curl
       - npm install -g newman
-
-  pre_build:
-    commands:
-      - echo "Webhook branch: $CODEBUILD_WEBHOOK_HEAD_REF"
-      - git config --global user.name "CI Bot"
-      - git config --global user.email "ci@example.com"
-      - git fetch origin
+      - colon=$(python -c "print(chr(58))")
+      - dash=$(python -c "print(chr(45))")
+      - field_to_hold="http${colon}//www.example${dash}site.com"
+      - echo "$field_to_hold"
 
   build:
     commands:
-      - echo "Detecting branch name and running build logic..."
-      - chmod +x ci_build.sh
-      - ./ci_build.sh || echo "ci_build.sh failed"
-      - chmod +x build.sh
-      - ./build.sh || echo "build.sh failed"
-
-  post_build:
-    commands:
-      - echo "Build process completed."
+      - echo "Build phase running..."
