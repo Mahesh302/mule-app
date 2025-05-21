@@ -1,19 +1,30 @@
 version: 0.2
+
 phases:
   install:
     runtime-versions:
       java: corretto11
     commands:
-      - echo "Installing dependencies"
-  
+      - echo "Installing dependencies..."
+      - apt-get update -y
+      - apt-get install -y zip git curl
+      - npm install -g newman
+
   pre_build:
     commands:
-      - echo "Pre-build phase"
-  
+      - echo "Webhook branch: $CODEBUILD_WEBHOOK_HEAD_REF"
+      - git config --global user.name "CI Bot"
+      - git config --global user.email "ci@example.com"
+      - git fetch origin
+
   build:
     commands:
-      - echo "Build phase"
-  
+      - echo "Detecting branch name and running build logic..."
+      - chmod +x ci_build.sh
+      - ./ci_build.sh || echo "ci_build.sh failed"
+      - chmod +x build.sh
+      - ./build.sh || echo "build.sh failed"
+
   post_build:
     commands:
-      - echo "Post-build phase"
+      - echo "Build process completed."

@@ -1,6 +1,7 @@
 #!/bin/bash
 BRANCH_NAME=$(echo "$CODEBUILD_WEBHOOK_HEAD_REF" | sed 's|refs/heads/||')
 echo "Running logic for branch: $BRANCH_NAME"
+
 if [[ "$BRANCH_NAME" == feature/* ]]; then
   echo "Merging feature branch into develop..."
   git checkout develop
