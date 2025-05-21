@@ -5,16 +5,29 @@ phases:
     runtime-versions:
       java: corretto11
     commands:
-      - echo "Installing dependencies"
+      - echo "Installing dependencies..."
+      - apt-get update && apt-get install -y zip git curl
+      - npm install -g newman
   
   pre_build:
     commands:
-      - echo "Pre-build phase"
+      - echo "Webhook branch: $CODEBUILD_WEBHOOK_HEAD_REF"
+      - git config --global user.name "CI Bot"
+      - git config --global user.email "ci@example.com"
+      - git fetch origin
   
   build:
     commands:
-      - echo "Build phase"
+      - echo "Detecting branch name..."
+      - BRANCH_NAME=$(echo "$CODEBUILD_WEBHOOK_HEAD_REF" | sed 's|refs/heads/||')
+      - echo "Running logic for branch: $BRANCH_NAME"
+      - echo "Build phase completed"
   
   post_build:
     commands:
       - echo "Post-build phase"
+
+artifacts:
+  files:
+    - '**/*'
+  discard-paths: no
