@@ -1,7 +1,17 @@
 #!/bin/bash
-set -e  # Stop script if any command fails
+set -e
 
 env | grep CODEBUILD
+
+if [ ! -d .git ]; then
+  echo "Error: Not a git repository. Exiting."
+  exit 1
+fi
+
+echo "Git info:"
+git status
+git branch -a
+git remote -v
 
 if [ -n "$CODEBUILD_WEBHOOK_HEAD_REF" ]; then
   BRANCH_NAME=$(echo "$CODEBUILD_WEBHOOK_HEAD_REF" | sed 's|refs/heads/||')
@@ -14,8 +24,9 @@ echo "Running logic for branch: $BRANCH_NAME"
 if [[ "$BRANCH_NAME" == feature/* ]]; then
   echo "Merging feature branch '$BRANCH_NAME' into develop..."
 
-  git fetch origin || { echo "git fetch failed"; exit 1; }
+  git fetch origin develop || { echo "git fetch failed"; exit 1; }
   git checkout develop || { echo "git checkout develop failed"; exit 1; }
+  git reset --hard origin/develop || { echo "git reset failed"; exit 1; }
   git merge origin/"$BRANCH_NAME" --no-ff -m "Auto-merge from $BRANCH_NAME" || { echo "git merge failed"; exit 1; }
   git push origin develop || { echo "git push failed"; exit 1; }
 
