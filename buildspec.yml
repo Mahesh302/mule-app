@@ -8,7 +8,7 @@ phases:
       - echo "Installing dependencies..."
       - yum update -y
       - yum remove -y curl-minimal || true
-    #  - yum install -y zip git curl python3
+      # - yum install -y zip git curl python3  # Uncomment if you need these
       - npm install -g newman
       - colon=$(python3 -c "print(chr(58))")
       - dash=$(python3 -c "print(chr(45))")
@@ -20,8 +20,7 @@ phases:
       - echo "Pre-build phase started"
       - git config --global user.name "CI Bot"
       - git config --global user.email "ci@example.com"
-      - cd $CODEBUILD_SRC_DIR
-      - git fetch origin
+      # Removed git fetch origin since it fails without a git repo
 
   build:
     commands:
