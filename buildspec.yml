@@ -7,28 +7,21 @@ phases:
     commands:
       - echo "Installing dependencies..."
       - yum update -y
-      - yum remove -y curl-minimal || true
-      # - yum install -y zip git curl python3  # Uncomment if you need these
+      - yum install -y git
       - npm install -g newman
-      - colon=$(python3 -c "print(chr(58))")
-      - dash=$(python3 -c "print(chr(45))")
-      - field_to_hold="http${colon}//www.example${dash}site.com"
-      - echo "$field_to_hold"
 
   pre_build:
     commands:
-      - echo "Pre-build phase started"
+      - echo "Configuring git..."
       - git config --global user.name "CI Bot"
       - git config --global user.email "ci@example.com"
-      # Removed git fetch origin since it fails without a git repo
+      - git fetch origin
 
   build:
     commands:
       - echo "Build phase started"
       - chmod +x ci_build.sh
       - ./ci_build.sh
-      - chmod +x build.sh
-      - ./build.sh
 
   post_build:
     commands:
